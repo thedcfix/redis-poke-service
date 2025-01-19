@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
 import redis
 import json
 import time
@@ -30,9 +30,9 @@ def poke():
 def healthcheck():
     try:
         redis_client.ping()
-        return "OK", 200
+        return jsonify(status="OK"), 200
     except redis.exceptions.ConnectionError:
-        return "Redis connection error", 500
+        return jsonify(status="Redis connection error"), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
