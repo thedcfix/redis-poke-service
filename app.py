@@ -9,6 +9,7 @@ app = Flask(__name__)
 redis_client = redis.StrictRedis(
     host=os.getenv('REDIS_HOST', 'localhost'),
     port=int(os.getenv('REDIS_PORT', 6379)),
+    username=os.getenv('REDIS_USER', 'default'),
     password=os.getenv('REDIS_PASSWORD', None),
     db=int(os.getenv('REDIS_DB', 0))
 )
