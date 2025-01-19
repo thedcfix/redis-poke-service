@@ -1,2 +1,1 @@
-# redis-poke-service
-A repository for Redis poke service
+This repository is empty. Any task executed on it should be considered a new capability and needs to be created.
