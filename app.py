@@ -4,6 +4,7 @@ import json
 import time
 import datetime
 import os
+import logging
 
 app = Flask(__name__)
 redis_client = redis.StrictRedis(
@@ -21,10 +22,16 @@ def home():
 @app.route('/poke')
 def poke():
     while True:
-        document = redis_client.get('poke')
-        if document is None:
-            document = json.dumps({'timestamp': datetime.datetime.now().isoformat()})
-            redis_client.set('poke', document)
+        try:
+            document = redis_client.get('poke')
+            if document is not None:
+                logging.info("Successfully read 'poke' from Redis.")
+            else:
+                document = json.dumps({'timestamp': datetime.datetime.now().isoformat()})
+                redis_client.set('poke', document)
+                logging.info("Set new 'poke' document in Redis.")
+        except redis.exceptions.RedisError as e:
+            logging.error(f"Redis error in /poke endpoint: {e}")
         time.sleep(43200)  # Sleep for 12 hours
 
 @app.route('/healthcheck')
