@@ -49,6 +49,10 @@ def poke_task():
         document = redis_command_with_retry(redis_client.get, 'poke')
         if document is not None:
             logging.info("Successfully read 'poke' from Redis.")
+            document = json.dumps({'timestamp': datetime.datetime.now().isoformat()})
+            # Attempt to set the 'poke' key in Redis with retry
+            redis_command_with_retry(redis_client.set, 'poke', document)
+            logging.info("Set new 'poke' document in Redis.")
         else:
             # Create a JSON document with the current timestamp
             document = json.dumps({'timestamp': datetime.datetime.now().isoformat()})
