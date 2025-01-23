@@ -2,7 +2,7 @@
 
 ## Project Description
 
-Redis Poke Service is a Flask application designed to keep a Redis Cache instance active on Azure's free tier. The primary objective is to prevent service suspension due to inactivity by performing a "poke" every **2 minutes**.
+Redis Poke Service is a Flask application designed to keep a Redis Cache instance active on Azure's free tier. The primary objective is to prevent service suspension due to inactivity by performing a "poke" every **12 hours**.
 
 ## Requirements
 
@@ -86,7 +86,7 @@ Redis Poke Service is a Flask application designed to keep a Redis Cache instanc
 
 ## Running the Application
 
-After configuring and deploying the application, Azure App Service will automatically run the Flask application. The "poke" task will keep the Redis service active by updating the timestamp every **2 minutes** using a retry mechanism to ensure reliability.
+After configuring and deploying the application, Azure App Service will automatically run the Flask application. The "poke" task will keep the Redis service active by updating the timestamp every **12 hours** using a retry mechanism to ensure reliability.
 
 ## Monitoring and Logging
 
@@ -95,7 +95,7 @@ After configuring and deploying the application, Azure App Service will automati
 
 ## Project Goal
 
-The main goal of this project is to keep the Redis service active on Azure's free tier by preventing suspension due to inactivity. This is achieved by periodically performing a "poke" that updates a timestamp in the Redis database every **2 minutes**. Additionally, a **retry mechanism** has been implemented to enhance the reliability of Redis cache access, ensuring that transient errors do not disrupt the poke operations.
+The main goal of this project is to keep the Redis service active on Azure's free tier by preventing suspension due to inactivity. This is achieved by periodically performing a "poke" that updates a timestamp in the Redis database every **12 hours**. Additionally, a **retry mechanism** has been implemented to enhance the reliability of Redis cache access, ensuring that transient errors do not disrupt the poke operations.
 
 ## Contributing
 

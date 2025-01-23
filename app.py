@@ -41,7 +41,7 @@ def redis_command_with_retry(command, *args, **kwargs):
 
 def poke_task():
     """
-    Task to poke the Redis cache every 2 minutes.
+    Task to poke the Redis cache every 12 hours.
     It checks if the 'poke' key exists. If not, it sets the key with the current timestamp.
     """
     try:
@@ -64,7 +64,7 @@ def poke_task():
 
 # Initialize and start the background scheduler
 scheduler = BackgroundScheduler()
-scheduler.add_job(poke_task, 'interval', minutes=2)
+scheduler.add_job(poke_task, 'interval', hours=12)
 scheduler.start()
 
 # Embedded HTML template using Tailwind CSS for styling
