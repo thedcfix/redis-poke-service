@@ -5,6 +5,7 @@ import datetime
 import os
 import logging
 from apscheduler.schedulers.background import BackgroundScheduler
+import time
 
 # Initialize the Flask application
 app = Flask(__name__)
@@ -21,26 +22,45 @@ redis_client = redis.StrictRedis(
 # Configure logging to display time, log level, and message
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+# Function to execute Redis commands with a retry mechanism
+def redis_command_with_retry(command, *args, **kwargs):
+    # Maximum number of retry attempts
+    retries = 3
+    # Delay between retries in seconds
+    delay = 5  # seconds
+    for attempt in range(retries):
+        try:
+            return command(*args, **kwargs)
+        except redis.exceptions.RedisError as e:
+            logging.error(f"Redis error on attempt {attempt + 1}: {e}")
+            if attempt < retries - 1:
+                # Wait before the next retry
+                time.sleep(delay)
+            else:
+                raise
+
 def poke_task():
     """
-    Task to poke the Redis cache every 12 hours.
+    Task to poke the Redis cache every 2 minutes.
     It checks if the 'poke' key exists. If not, it sets the key with the current timestamp.
     """
     try:
-        document = redis_client.get('poke')
+        # Attempt to retrieve the 'poke' key from Redis with retry
+        document = redis_command_with_retry(redis_client.get, 'poke')
         if document is not None:
             logging.info("Successfully read 'poke' from Redis.")
         else:
             # Create a JSON document with the current timestamp
             document = json.dumps({'timestamp': datetime.datetime.now().isoformat()})
-            redis_client.set('poke', document)
+            # Attempt to set the 'poke' key in Redis with retry
+            redis_command_with_retry(redis_client.set, 'poke', document)
             logging.info("Set new 'poke' document in Redis.")
     except redis.exceptions.RedisError as e:
         logging.error(f"Redis error in poke_task: {e}")
 
 # Initialize and start the background scheduler
 scheduler = BackgroundScheduler()
-scheduler.add_job(poke_task, 'interval', hours=12)
+scheduler.add_job(poke_task, 'interval', minutes=2)
 scheduler.start()
 
 # Embedded HTML template using Tailwind CSS for styling
@@ -70,7 +90,8 @@ def home():
     Retrieves the 'poke' key from Redis and passes the timestamp to the HTML template.
     """
     try:
-        document = redis_client.get('poke')
+        # Retrieve the 'poke' key from Redis with retry
+        document = redis_command_with_retry(redis_client.get, 'poke')
         if document:
             data = json.loads(document)
             last_poked = data.get('timestamp', 'Not available')
@@ -91,7 +112,8 @@ def healthcheck():
     Returns a JSON response indicating the status.
     """
     try:
-        redis_client.ping()
+        # Ping Redis to check the connection with retry
+        redis_command_with_retry(redis_client.ping)
         logging.info("Redis connection successful.")
         return jsonify(status="OK"), 200
     except redis.exceptions.ConnectionError as e:
